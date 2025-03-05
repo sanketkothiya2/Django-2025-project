@@ -1,10 +1,66 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends 'base.html' %}
 
-</body>
-</html>
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <h2>Your Files</h2>
+        <div class="card">
+            <div class="card-body">
+                <form action="{% url 'file-upload' %}" method="post" enctype="multipart/form-data" class="mb-4">
+                    {% csrf_token %}
+                    <div class="input-group">
+                        <input type="file" class="form-control" name="file" required>
+                        <button type="submit" class="btn btn-primary">Upload</button>
+                    </div>
+                </form>
+
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Size</th>
+                            <th>Created</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for file in files %}
+                        <tr>
+                            <td>{{ file.name }}</td>
+                            <td>{{ file.size|filesizeformat }}</td>
+                            <td>{{ file.created_at }}</td>
+                            <td>
+                                <a href="{% url 'file-download' file.pk %}" class="btn btn-sm btn-primary">Download</a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4">No files uploaded yet.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <h2>Storage Nodes</h2>
+        <div class="card">
+            <div class="card-body">
+                <ul class="list-group">
+                    {% for node in storage_nodes %}
+                    <li class="list-group-item">
+                        <h5>{{ node.name }}</h5>
+                        <p class="mb-0">Status: <span class="badge bg-{{ node.status|lower }}">{{ node.status }}</span></p>
+                        <small>Storage: {{ node.used_storage|filesizeformat }} / {{ node.storage_capacity|filesizeformat }}</small>
+                    </li>
+                    {% empty %}
+                    <li class="list-group-item">No storage nodes available.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
